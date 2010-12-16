@@ -1,0 +1,5 @@
+-
+  type: luadoc
+  input-file: LibDualSpec-1.0.lua
+  output-page: "Main"
+
