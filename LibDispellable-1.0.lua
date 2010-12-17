@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 1
+local MAJOR, MINOR = "LibDispellable-1.0", 2
 --@debug@
 MINOR = 999999999
 --@end-debug@
@@ -51,28 +51,57 @@ if not lib.eventFrame then
 end
 
 -- ----------------------------------------------------------------------------
--- Data initialization
+-- Data
 -- ----------------------------------------------------------------------------
 
 lib.defensive = lib.defensive or {}
+lib.byName = lib.byName or {}
+
+local rageEffects = {
+	12292, -- Death Wish (Warrior)
+	18499, -- Berserker Rage (Warrior)
+	76691, -- Vengeance (all tanks)
+	-- Actualy a tons**t of skills are named Enrage, let's hope most are dispellable...
+	12880, -- Enrage (Warrior)
+	57516, -- Enrage (Warrior)
+	5229,  -- Enrage (Druid)
+	72143, -- Enrage (Shambling Horror)
+}
+
+-- ----------------------------------------------------------------------------
+-- Detect available dispel skiils
+-- ----------------------------------------------------------------------------
 
 local function CheckSpell(spellID, pet)
-	return IsSpellKnown(spellID, pet) and spellID or nil 
+	return IsSpellKnown(spellID, pet) and spellID or nil
 end
 
 local function CheckTalent(tab, index)
 	return (select(5, GetTalentInfo(tab, index)) or 0) >= 1
 end
 
+local function AddTranquilizingSpell(spellID)
+	if IsSpellKnown(spellID) then
+		for i, rageID in pairs(lib.rageEffects) do
+			local name = GetSpellInfo(rageID)
+			if name then
+				lib.byName[name] = spellID
+			end
+		end
+	end
+end
+
 function lib:UpdateSpells()
 	wipe(self.defensive)
+	wipe(self.byName)
 	self.offensive = nil
-	
+
 	local _, class = UnitClass("player")
-	
+
 	if class == "HUNTER" then
-		self.offensive = CheckSpell(19801) -- Tranquilizing Shot	
-		
+		self.offensive = CheckSpell(19801) -- Tranquilizing Shot
+		AddTranquilizingSpell(19801) -- Tranquilizing Shot
+
 	elseif class == "SHAMAN" then
 		self.offensive = CheckSpell(370) -- Purge
 		if IsSpellKnown(51886) then -- Cleanse Spirit
@@ -86,14 +115,14 @@ function lib:UpdateSpells()
 		self.offensive = CheckSpell(19505, true) -- Devour Magic (Felhunter)
 		self.defensive.Magic = CheckSpell(89808, true) -- Singe Magic (Imp)
 
-	elseif class == "MAGE" then		
+	elseif class == "MAGE" then
 		self.defensive.Curse = CheckSpell(475) -- Remove Curse
-		
+
 	elseif class == "PRIEST" then
-		self.offensive = CheckSpell(527) -- Dispel Magic	
-		self.defensive.Magic = self.offensive -- Dispel Magic			
+		self.offensive = CheckSpell(527) -- Dispel Magic
+		self.defensive.Magic = self.offensive -- Dispel Magic
 		self.defensive.Disease = CheckSpell(528) -- Cure Disease
-		
+
 	elseif class == "DRUID" then
 		if IsSpellKnown(2782) then  -- Remove Corruption
 			self.defensive.Curse = 2782
@@ -102,9 +131,13 @@ function lib:UpdateSpells()
 				self.defensive.Magic = 2782
 			end
 		end
-		
+		AddTranquilizingSpell(2908) -- Soothe
+
+	elseif class == "ROGUE" then
+		AddTranquilizingSpell(5938) -- Shiv
+
 	elseif class == "PALADIN" then
-		if IsSpellKnown(4987) then -- Cleanse	
+		if IsSpellKnown(4987) then -- Cleanse
 			self.defensive.Poison = 4987
 			self.defensive.Disease = 4987
 			if CheckTalent(1, 14) then -- Sacred Cleansing
@@ -122,11 +155,12 @@ end
 -- @name LibDispellable:CanDispell
 -- @param unit (string) The unit id on which the spell is.
 -- @param dispelType (string) The dispel mechanisms, as returned by UnitAura.
+-- @param name (string, optional) The buff name, used to test rage effects.
 -- @return canDispell, spellID (boolean, number) Whether this kind of spell can be dispelled and the spell to use to do so.
-function lib:CanDispel(unit, dispelType)
-	local spell 
+function lib:CanDispel(unit, dispelType, name)
+	local spell
 	if UnitCanAttack("player", unit) then
-		spell = (dispelType == "Magic") and self.offensive
+		spell = (dispelType == "Magic" and self.offensive) or (name and self.byName[name])
 	elseif UnitCanAssist("player", unit) then
 		spell = dispelType and self.defensive[dispelType]
 	end
@@ -143,8 +177,9 @@ local function buffIterator(unit, index)
 	repeat
 		index = index + 1
 		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitAura(unit, index, "HARMFUL")
-		if name and dispelType == "Magic" then
-			return index, lib.offensive, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
+		local dispel = (dispelType == "Magic" and lib.offensive) or (name and lib.byBame[name])
+		if dispel then
+			return index, dispel, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
 		end
 	until not name
 end
