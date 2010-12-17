@@ -176,7 +176,7 @@ local function noop() end
 local function buffIterator(unit, index)
 	repeat
 		index = index + 1
-		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitAura(unit, index, "HARMFUL")
+		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitAura(unit, index, "HELPFUL")
 		local dispel = (dispelType == "Magic" and lib.offensive) or (name and lib.byBame[name])
 		if dispel then
 			return index, dispel, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
@@ -187,7 +187,7 @@ end
 local function debuffIterator(unit, index)
 	repeat
 		index = index + 1
-		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitAura(unit, index, "HELPFUL")
+		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitAura(unit, index, "HARMFUL")
 		local spell = name and dispelType and lib.defensive[dispelType]
 		if spell then
 			return index, spell, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
