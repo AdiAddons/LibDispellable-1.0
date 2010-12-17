@@ -151,11 +151,11 @@ end
 -- Simple query method
 -- ----------------------------------------------------------------------------
 
---- Test if the player can dispel the spell with given.
+--- Test if the player can dispel the given (de)buff on the given unit.
 -- @name LibDispellable:CanDispell
--- @param unit (string) The unit id on which the spell is.
--- @param dispelType (string) The dispel mechanisms, as returned by UnitAura.
--- @param name (string, optional) The buff name, used to test rage effects.
+-- @param unit (string) The unit id.
+-- @param dispelType (string) The dispel mechanism, as returned by UnitAura.
+-- @param name (string, optional) The localized (de)buff name, used to test rage effects.
 -- @return canDispell, spellID (boolean, number) Whether this kind of spell can be dispelled and the spell to use to do so.
 function lib:CanDispel(unit, dispelType, name)
 	local spell
