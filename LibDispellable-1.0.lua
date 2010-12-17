@@ -82,7 +82,7 @@ end
 
 local function AddTranquilizingSpell(spellID)
 	if IsSpellKnown(spellID) then
-		for i, rageID in pairs(lib.rageEffects) do
+		for i, rageID in pairs(rageEffects) do
 			local name = GetSpellInfo(rageID)
 			if name then
 				lib.byName[name] = spellID
