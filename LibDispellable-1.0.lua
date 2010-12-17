@@ -61,7 +61,7 @@ local rageEffects = {
 	12292, -- Death Wish (Warrior)
 	18499, -- Berserker Rage (Warrior)
 	76691, -- Vengeance (all tanks)
-	-- Actualy a tons**t of skills are named Enrage, let's hope most are dispellable...
+	-- Actually a tons**t of skills are named Enrage, let's hope most are dispellable...
 	12880, -- Enrage (Warrior)
 	57516, -- Enrage (Warrior)
 	5229,  -- Enrage (Druid)
@@ -152,11 +152,11 @@ end
 -- ----------------------------------------------------------------------------
 
 --- Test if the player can dispel the given (de)buff on the given unit.
--- @name LibDispellable:CanDispell
+-- @name LibDispellable:CanDispel
 -- @param unit (string) The unit id.
 -- @param dispelType (string) The dispel mechanism, as returned by UnitAura.
--- @param name (string, optional) The localized (de)buff name, used to test rage effects.
--- @return canDispell, spellID (boolean, number) Whether this kind of spell can be dispelled and the spell to use to do so.
+-- @param name (string, optional) The localized (de)buff name, used to test enrage effects.
+-- @return canDispel, spellID (boolean, number) Whether this kind of spell can be dispelled and the spell to use to do so.
 function lib:CanDispel(unit, dispelType, name)
 	local spell
 	if UnitCanAttack("player", unit) then
