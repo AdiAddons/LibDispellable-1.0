@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 6
+local MAJOR, MINOR = "LibDispellable-1.0", 7
 --@debug@
 MINOR = 999999999
 --@end-debug@
@@ -148,14 +148,15 @@ end
 --- Test if the player can dispel the given (de)buff on the given unit.
 -- @name LibDispellable:CanDispel
 -- @param unit (string) The unit id.
+-- @param offensive (boolean) True to test offensive dispel, i.e. enemy buffs.
 -- @param dispelType (string) The dispel mechanism, as returned by UnitAura.
 -- @param spellID (number, optional) The buff spell ID, as returned by UnitAura, used to test enrage effects.
 -- @return canDispel, spellID (boolean, number) Whether this kind of spell can be dispelled and the spell to use to do so.
-function lib:CanDispel(unit, dispelType, spellID)
+function lib:CanDispel(unit, offensive, dispelType, spellID)
 	local spell
-	if UnitCanAttack("player", unit) then
+	if offensive and UnitCanAttack("player", unit) then
 		spell = (dispelType == "Magic" and self.offensive) or (spellID and lib.enrageEffectIDs[spellID] and self.tranquilize)
-	elseif UnitCanAssist("player", unit) then
+	elseif not offensive and UnitCanAssist("player", unit) then
 		spell = dispelType and self.defensive[dispelType]
 	end
 	return not not spell, spell or nil
@@ -171,7 +172,7 @@ local function buffIterator(unit, index)
 	repeat
 		index = index + 1
 		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitAura(unit, index, "HELPFUL")
-		local dispel = (dispelType == "Magic" and lib.offensive) or (spellID and lib.enrageEffectIDs[spellID] and self.tranquilize)
+		local dispel = (dispelType == "Magic" and lib.offensive) or (spellID and lib.enrageEffectIDs[spellID] and lib.tranquilize)
 		if dispel then
 			return index, dispel, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
 		end
