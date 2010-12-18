@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 4
+local MAJOR, MINOR = "LibDispellable-1.0", 5
 --@debug@
 MINOR = 999999999
 --@end-debug@
@@ -55,18 +55,25 @@ end
 -- ----------------------------------------------------------------------------
 
 lib.defensive = lib.defensive or {}
-lib.enrageEffects = lib.enrageEffects or {}
+lib.enrageEffectIDs = lib.enrageEffectIDs or {}
 
-local enrageEffectsIDs = {
-	12292, -- Death Wish (Warrior)
-	18499, -- Berserker Rage (Warrior)
-	76691, -- Vengeance (all tanks)
-	-- Actually a tons**t of skills are named Enrage, let's hope most are dispellable...
-	12880, -- Enrage (Warrior)
-	57516, -- Enrage (Warrior)
-	5229,  -- Enrage (Druid)
-	72143, -- Enrage (Shambling Horror)
-}
+wipe(lib.enrageEffectIDs)
+for _, id in ipairs({
+	-- Datamined using fetchEnrageList.sh (see source)
+	134, 256, 772, 4146, 8599, 12880, 14201, 14202, 14203, 14204, 15061, 15716,
+	18501, 19451, 19812, 22428, 23128, 23257, 23342, 24689, 25503, 26041, 26051,
+	28371, 29131, 29340, 30485, 31540, 31915, 32714, 33958, 34392, 34670, 37605,
+	37648, 37975, 38046, 38166, 38664, 39031, 39575, 40076, 40601, 41254, 41364,
+	41447, 42705, 42745, 43139, 43292, 43664, 47399, 48138, 48142, 48193, 48391,
+	48702, 49029, 50420, 50636, 51170, 51513, 51662, 52071, 52262, 52309, 52461,
+	52470, 52537, 53361, 54356, 54427, 54475, 54508, 54781, 55285, 55462, 56646,
+	56729, 56769, 57514, 57516, 57518, 57519, 57520, 57521, 57522, 57733, 58942,
+	59465, 59694, 59697, 59707, 59828, 60075, 60177, 60430, 61369, 62071, 63147,
+	63227, 63848, 66092, 66759, 67233, 67657, 67658, 67659, 68541, 69052, 70371,
+	72143, 72146, 72147, 72148, 72203, 75998, 76100, 76487, 76691, 76816, 76862,
+	77238, 78722, 78943, 79420, 80084, 80158, 80467, 81706, 81772, 82033, 82759,
+	86736, 90045, 90872, 91668, 92946, 95436, 95459,
+}) do lib.enrageEffectIDs[id] = true end
 
 -- ----------------------------------------------------------------------------
 -- Detect available dispel skiils
@@ -80,17 +87,6 @@ local function CheckTalent(tab, index)
 	return (select(5, GetTalentInfo(tab, index)) or 0) >= 1
 end
 
-local function AddTranquilizingSpell(spellID)
-	if IsSpellKnown(spellID) then
-		for i, id in pairs(enrageEffectsIDs) do
-			local name = GetSpellInfo(id)
-			if name then
-				lib.enrageEffects[name] = spellID
-			end
-		end
-	end
-end
-
 function lib:UpdateSpells()
 	wipe(self.defensive)
 	wipe(self.enrageEffects)
@@ -100,7 +96,7 @@ function lib:UpdateSpells()
 
 	if class == "HUNTER" then
 		self.offensive = CheckSpell(19801) -- Tranquilizing Shot
-		AddTranquilizingSpell(19801) -- Tranquilizing Shot
+		self.tranquilize = self.offensive
 
 	elseif class == "SHAMAN" then
 		self.offensive = CheckSpell(370) -- Purge
@@ -131,10 +127,10 @@ function lib:UpdateSpells()
 				self.defensive.Magic = 2782
 			end
 		end
-		AddTranquilizingSpell(2908) -- Soothe
+		self.tranquilize = CheckSpell(2908) -- Soothe
 
 	elseif class == "ROGUE" then
-		AddTranquilizingSpell(5938) -- Shiv
+		self.tranquilize = CheckSpell(5938) -- Shiv
 
 	elseif class == "PALADIN" then
 		if IsSpellKnown(4987) then -- Cleanse
@@ -155,12 +151,12 @@ end
 -- @name LibDispellable:CanDispel
 -- @param unit (string) The unit id.
 -- @param dispelType (string) The dispel mechanism, as returned by UnitAura.
--- @param name (string, optional) The localized (de)buff name, used to test enrage effects.
+-- @param spellID (number, optional) The buff spell ID, as returned by UnitAura, used to test enrage effects.
 -- @return canDispel, spellID (boolean, number) Whether this kind of spell can be dispelled and the spell to use to do so.
-function lib:CanDispel(unit, dispelType, name)
+function lib:CanDispel(unit, dispelType, spellID)
 	local spell
 	if UnitCanAttack("player", unit) then
-		spell = (dispelType == "Magic" and self.offensive) or (name and self.enrageEffects[name])
+		spell = (dispelType == "Magic" and self.offensive) or (spellID and lib.enrageEffectIDs[spellID] and self.tranquilize)
 	elseif UnitCanAssist("player", unit) then
 		spell = dispelType and self.defensive[dispelType]
 	end
@@ -177,7 +173,7 @@ local function buffIterator(unit, index)
 	repeat
 		index = index + 1
 		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitAura(unit, index, "HELPFUL")
-		local dispel = (dispelType == "Magic" and lib.offensive) or (name and lib.byBame[name])
+		local dispel = (dispelType == "Magic" and lib.offensive) or (spellID and lib.enrageEffectIDs[spellID] and self.tranquilize)
 		if dispel then
 			return index, dispel, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
 		end
@@ -205,7 +201,7 @@ end
 --     print("Can dispel", name, "on target using", GetSpellInfo(spellID))
 --   end
 function lib:IterateDispellableAuras(unit, offensive)
-	if offensive and UnitCanAttack("player", unit) and (self.offensive or next(self.enrageEffects)) then
+	if offensive and UnitCanAttack("player", unit) and (self.offensive or self.tranquilize) then
 		return buffIterator, unit, 0
 	elseif not offensive and UnitCanAssist("player", unit) and next(self.defensive) then
 		return debuffIterator, unit, 0
