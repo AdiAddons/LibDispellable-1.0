@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 5
+local MAJOR, MINOR = "LibDispellable-1.0", 6
 --@debug@
 MINOR = 999999999
 --@end-debug@
@@ -55,9 +55,8 @@ end
 -- ----------------------------------------------------------------------------
 
 lib.defensive = lib.defensive or {}
-lib.enrageEffectIDs = lib.enrageEffectIDs or {}
+lib.enrageEffectIDs = wipe(lib.enrageEffectIDs or {})
 
-wipe(lib.enrageEffectIDs)
 for _, id in ipairs({
 	-- Datamined using fetchEnrageList.sh (see source)
 	134, 256, 772, 4146, 8599, 12880, 14201, 14202, 14203, 14204, 15061, 15716,
@@ -89,7 +88,6 @@ end
 
 function lib:UpdateSpells()
 	wipe(self.defensive)
-	wipe(self.enrageEffects)
 	self.offensive = nil
 
 	local _, class = UnitClass("player")
