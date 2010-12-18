@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 3
+local MAJOR, MINOR = "LibDispellable-1.0", 4
 --@debug@
 MINOR = 999999999
 --@end-debug@
@@ -55,9 +55,9 @@ end
 -- ----------------------------------------------------------------------------
 
 lib.defensive = lib.defensive or {}
-lib.byName = lib.byName or {}
+lib.enrageEffects = lib.enrageEffects or {}
 
-local rageEffects = {
+local enrageEffectsIDs = {
 	12292, -- Death Wish (Warrior)
 	18499, -- Berserker Rage (Warrior)
 	76691, -- Vengeance (all tanks)
@@ -82,10 +82,10 @@ end
 
 local function AddTranquilizingSpell(spellID)
 	if IsSpellKnown(spellID) then
-		for i, rageID in pairs(rageEffects) do
-			local name = GetSpellInfo(rageID)
+		for i, id in pairs(enrageEffectsIDs) do
+			local name = GetSpellInfo(id)
 			if name then
-				lib.byName[name] = spellID
+				lib.enrageEffects[name] = spellID
 			end
 		end
 	end
@@ -93,7 +93,7 @@ end
 
 function lib:UpdateSpells()
 	wipe(self.defensive)
-	wipe(self.byName)
+	wipe(self.enrageEffects)
 	self.offensive = nil
 
 	local _, class = UnitClass("player")
@@ -160,7 +160,7 @@ end
 function lib:CanDispel(unit, dispelType, name)
 	local spell
 	if UnitCanAttack("player", unit) then
-		spell = (dispelType == "Magic" and self.offensive) or (name and self.byName[name])
+		spell = (dispelType == "Magic" and self.offensive) or (name and self.enrageEffects[name])
 	elseif UnitCanAssist("player", unit) then
 		spell = dispelType and self.defensive[dispelType]
 	end
@@ -205,7 +205,7 @@ end
 --     print("Can dispel", name, "on target using", GetSpellInfo(spellID))
 --   end
 function lib:IterateDispellableAuras(unit, offensive)
-	if offensive and UnitCanAttack("player", unit) and self.offensive then
+	if offensive and UnitCanAttack("player", unit) and (self.offensive or next(self.enrageEffects)) then
 		return buffIterator, unit, 0
 	elseif not offensive and UnitCanAssist("player", unit) and next(self.defensive) then
 		return debuffIterator, unit, 0
