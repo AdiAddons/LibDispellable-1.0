@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 7
+local MAJOR, MINOR = "LibDispellable-1.0", 8
 --@debug@
 MINOR = 999999999
 --@end-debug@
@@ -171,10 +171,10 @@ local function noop() end
 local function buffIterator(unit, index)
 	repeat
 		index = index + 1
-		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitAura(unit, index, "HELPFUL")
+		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura = UnitBuff(unit, index)
 		local dispel = (dispelType == "Magic" and lib.offensive) or (spellID and lib.enrageEffectIDs[spellID] and lib.tranquilize)
 		if dispel then
-			return index, dispel, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
+			return index, dispel, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura
 		end
 	until not name
 end
@@ -182,10 +182,10 @@ end
 local function debuffIterator(unit, index)
 	repeat
 		index = index + 1
-		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID = UnitAura(unit, index, "HARMFUL")
+		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff = UnitDebuff(unit, index)
 		local spell = name and dispelType and lib.defensive[dispelType]
 		if spell then
-			return index, spell, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID
+			return index, spell, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff
 		end
 	until not name
 end
@@ -196,7 +196,7 @@ end
 -- @param offensive (boolean) true to test buffs instead of debuffs (offensive dispel).
 -- @return A triplet usable in the "in" part of a for ... in ... do loop.
 -- @usage
---   for index, spellID, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID in LibDispellable:IterateDispellableAuras("target", true) do
+--   for index, spellID, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff in LibDispellable:IterateDispellableAuras("target", true) do
 --     print("Can dispel", name, "on target using", GetSpellInfo(spellID))
 --   end
 function lib:IterateDispellableAuras(unit, offensive)
