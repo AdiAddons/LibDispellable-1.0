@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 8
+local MAJOR, MINOR = "LibDispellable-1.0", 9
 --@debug@
 MINOR = 999999999
 --@end-debug@
@@ -142,6 +142,18 @@ function lib:UpdateSpells()
 end
 
 -- ----------------------------------------------------------------------------
+-- Enrage test method
+-- ----------------------------------------------------------------------------
+
+--- Test if the specified spell is an enrage effect
+-- @name LibDispellable:IsEnrageEffect
+-- @param spellID (number) The spell ID
+-- @return isEnrage (boolean) true if the passed spell ID 
+function lib:IsEnrageEffect(spellID)
+	return spellID and lib.enrageEffectIDs[spellID]
+end
+
+-- ----------------------------------------------------------------------------
 -- Simple query method
 -- ----------------------------------------------------------------------------
 
@@ -155,7 +167,7 @@ end
 function lib:CanDispel(unit, offensive, dispelType, spellID)
 	local spell
 	if offensive and UnitCanAttack("player", unit) then
-		spell = (dispelType == "Magic" and self.offensive) or (spellID and lib.enrageEffectIDs[spellID] and self.tranquilize)
+		spell = (dispelType == "Magic" and self.offensive) or (self:IsEnrageEffect(spellID) and self.tranquilize)
 	elseif not offensive and UnitCanAssist("player", unit) then
 		spell = dispelType and self.defensive[dispelType]
 	end
