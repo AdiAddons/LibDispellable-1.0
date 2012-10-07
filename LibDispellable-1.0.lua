@@ -1,6 +1,6 @@
 --[[
 LibDispellable-1.0 - Test whether the player can really dispell a buff or debuff, given its talents.
-Copyright (C) 2009-2010 Adirelle
+Copyright (C) 2009-2012 Adirelle (adirelle@gmail.com)
 
 All rights reserved.
 
