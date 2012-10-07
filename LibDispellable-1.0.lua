@@ -71,7 +71,8 @@ for _, id in ipairs({
 	63227, 63848, 66092, 66759, 67233, 67657, 67658, 67659, 68541, 69052, 70371,
 	72143, 72146, 72147, 72148, 72203, 75998, 76100, 76487, 76691, 76816, 76862,
 	77238, 78722, 78943, 79420, 80084, 80158, 80467, 81706, 81772, 82033, 82759,
-	86736, 90045, 90872, 91668, 92946, 95436, 95459,
+	86736, 90045, 90872, 91668, 92946, 95436, 95459, 101109, 101110, 102134,
+	102989, 108169, 108566, 109889
 }) do lib.enrageEffectIDs[id] = true end
 
 -- ----------------------------------------------------------------------------
@@ -148,7 +149,7 @@ end
 --- Test if the specified spell is an enrage effect
 -- @name LibDispellable:IsEnrageEffect
 -- @param spellID (number) The spell ID
--- @return isEnrage (boolean) true if the passed spell ID 
+-- @return isEnrage (boolean) true if the passed spell ID
 function lib:IsEnrageEffect(spellID)
 	return spellID and lib.enrageEffectIDs[spellID]
 end
