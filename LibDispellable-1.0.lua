@@ -47,7 +47,6 @@ if not lib.eventFrame then
 	lib.eventFrame = CreateFrame("Frame")
 	lib.eventFrame:SetScript('OnEvent', function() return lib:UpdateSpells() end)
 	lib.eventFrame:RegisterEvent('SPELLS_CHANGED')
-	lib.eventFrame:RegisterEvent('PLAYER_TALENT_UPDATE')
 end
 
 -- ----------------------------------------------------------------------------
@@ -83,10 +82,6 @@ local function CheckSpell(spellID, pet)
 	return IsSpellKnown(spellID, pet) and spellID or nil
 end
 
-local function CheckTalent(tab, index)
-	return (select(5, GetTalentInfo(tab, index)) or 0) >= 1
-end
-
 function lib:UpdateSpells()
 	wipe(self.defensive)
 	self.offensive = nil
@@ -99,11 +94,11 @@ function lib:UpdateSpells()
 
 	elseif class == "SHAMAN" then
 		self.offensive = CheckSpell(370) -- Purge
-		if IsSpellKnown(51886) then -- Cleanse Spirit
-			self.defensive.Curse = 51886
-			if CheckTalent(3, 12) then -- Improved Cleanse Spirit
-				self.defensive.Magic = 51886
-			end
+		if IsSpellKnown(77130) then -- Purify Spirit
+			self.defensive.Curse = 77130
+			self.defensive.Magic = 77130
+		else
+			self.defensive.Curse = CheckSpell(51886) -- Cleanse Spirit
 		end
 
 	elseif class == "WARLOCK" then
@@ -114,18 +109,18 @@ function lib:UpdateSpells()
 		self.defensive.Curse = CheckSpell(475) -- Remove Curse
 
 	elseif class == "PRIEST" then
-		self.offensive = CheckSpell(527) -- Dispel Magic
-		self.defensive.Magic = self.offensive -- Dispel Magic
-		self.defensive.Disease = CheckSpell(528) -- Cure Disease
+		self.offensive = CheckSpell(528) -- Dispel Magic
+		self.defensive.Magic = CheckSpell(527) -- Purify
+		self.defensive.Disease = self.defensive.Magic
 
 	elseif class == "DRUID" then
-		if IsSpellKnown(2782) then  -- Remove Corruption
-			self.defensive.Curse = 2782
-			self.defensive.Poison = 2782
-			if CheckTalent(3, 17) then -- Nature's Cure
-				self.defensive.Magic = 2782
-			end
+		if IsSpellKnown(88423) then -- Nature's Cure
+			self.defensive.Curse = 88423
+			self.defensive.Magic = 88423
+		else
+			self.defensive.Curse = CheckSpell(2782) -- Remove Corruption
 		end
+		self.defensive.Poison = self.defensive.Curse
 		self.tranquilize = CheckSpell(2908) -- Soothe
 
 	elseif class == "ROGUE" then
@@ -135,10 +130,11 @@ function lib:UpdateSpells()
 		if IsSpellKnown(4987) then -- Cleanse
 			self.defensive.Poison = 4987
 			self.defensive.Disease = 4987
-			if CheckTalent(1, 14) then -- Sacred Cleansing
+			if IsSpellKnown(53551) then -- Sacred Cleansing
 				self.defensive.Magic = 4987
 			end
 		end
+
 	end
 end
 
