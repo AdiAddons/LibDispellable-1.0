@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 9
+local MAJOR, MINOR = "LibDispellable-1.0", 10
 --@debug@
 MINOR = 999999999
 --@end-debug@
@@ -134,6 +134,10 @@ function lib:UpdateSpells()
 				self.defensive.Magic = 4987
 			end
 		end
+
+	elseif class == "MONK" then
+		self.defensive.Disease = CheckSpell(115450) -- Detox
+		self.defensive.Poison = self.defensive.Disease
 
 	end
 end
