@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 10
+local MAJOR, MINOR = "LibDispellable-1.0", 11
 --@debug@
 MINOR = 999999999
 --@end-debug@
@@ -55,6 +55,7 @@ end
 
 lib.defensive = lib.defensive or {}
 lib.enrageEffectIDs = wipe(lib.enrageEffectIDs or {})
+lib.spells = {}
 
 for _, id in ipairs({
 	-- Datamined using fetchEnrageList.sh (see source)
@@ -140,6 +141,18 @@ function lib:UpdateSpells()
 		self.defensive.Poison = self.defensive.Disease
 
 	end
+
+	wipe(self.spells)
+	if self.offensive then
+		self.spells[self.offensive] = 'offensive'
+	end
+	if self.tranquilize then
+		self.spells[self.tranquilize] = 'tranquilize'
+	end
+	for dispelType, id in pairs(self.defensive) do
+		self.spells[id] = 'defensive'
+	end
+
 end
 
 -- ----------------------------------------------------------------------------
@@ -222,8 +235,51 @@ function lib:IterateDispellableAuras(unit, offensive)
 	end
 end
 
+--- Test if the given spell can be used to dispel something on the given unit.
+-- @name LibDispellable:CanDispelWith
+-- @param unit (string) The unit to check.
+-- @param spellID (number) The spell to use.
+-- @return true if the
+-- @usage
+--   if LibDispellable:CanDispelWith('focus', 4987) then
+--     -- Tell the user that Cleanse (id 4987) could be used to dispel something from the focus
+--   end
+function lib:CanDispelWith(unit, spellID)
+	local dispelType = spellID and self.spells[spellID]
+	if UnitCanAttack("player", unit) then
+		if dispelType == 'offensive' then
+			for index = 1, math.huge do
+				local name, _, _, _, dispelType = UnitBuff(unit, index)
+				if not name then
+					return false
+				elseif dispelType == 'Magic' then
+					return true
+				end
+			end
+		elseif dispelType == 'tranquilize' then
+			for index = 1, math.huge do
+				local name, _, _, _, _, _, _, _, _, _, buffID = UnitBuff(unit, index)
+				if not name then
+					return false
+				elseif self:IsEnrageEffect(buffID) then
+					return true
+				end
+			end
+		end
+	elseif dispelType == 'defensive' and UnitCanAssist("player", unit) then
+		for index = 1, math.huge do
+			local name, _, _, _, dispelType = UnitDebuff(unit, index)
+			if not name then
+				return false
+			elseif self.defensive[dispelType] == spellID then
+				return true
+			end
+		end
+	end
+	return false
+end
+
 -- Initialization
 if IsLoggedIn() then
 	lib:UpdateSpells()
 end
-
