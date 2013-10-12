@@ -1,4 +1,4 @@
-## Interface: 50300
+## Interface: 50400
 ## LoadOnDemand: 1
 ## Title: Lib: Dispellable-1.0
 ## Version: @project-version@
