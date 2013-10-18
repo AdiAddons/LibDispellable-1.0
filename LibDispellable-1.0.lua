@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 13
+local MAJOR, MINOR = "LibDispellable-1.0", 14
 --@debug@
 MINOR = 999999999
 --@end-debug@
@@ -100,8 +100,8 @@ function lib:UpdateSpells()
 		end
 
 	elseif class == "WARLOCK" then
-		self.offensive = CheckSpell(19505, true) -- Devour Magic (Felhunter)
-		self.defensive.Magic = CheckSpell(89808, true) -- Singe Magic (Imp)
+		self.offensive = 19505 -- Devour Magic (Felhunter)
+		self.defensive.Magic = CheckSpell(132411) or CheckSpell(89808, true) -- Singe Magic (Imp)
 
 	elseif class == "MAGE" then
 		self.defensive.Curse = CheckSpell(475) -- Remove Curse
