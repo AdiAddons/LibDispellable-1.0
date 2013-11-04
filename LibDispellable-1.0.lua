@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 14
+local MAJOR, MINOR = "LibDispellable-1.0", 15
 --@debug@
 MINOR = 999999999
 --@end-debug@
@@ -72,8 +72,13 @@ for _, id in ipairs({
 	145554, 145692, 145974,
 }) do lib.enrageEffectIDs[id] = true end
 
+-- Spells that do not have a dispel type according to Blizzard API
+-- but that can be dispelled anyway.
+lib.specialIDs = wipe(lib.specialIDs or {})
+lib.specialIDs[144351] = "Magic" -- Mark of Arrogance (Sha of Pride encounter)
+
 -- ----------------------------------------------------------------------------
--- Detect available dispel skiils
+-- Detect available dispel skills
 -- ----------------------------------------------------------------------------
 
 local function CheckSpell(spellID, pet)
@@ -182,7 +187,7 @@ function lib:CanDispel(unit, offensive, dispelType, spellID)
 	if offensive and UnitCanAttack("player", unit) then
 		spell = (dispelType == "Magic" and self.offensive) or (self:IsEnrageEffect(spellID) and self.tranquilize)
 	elseif not offensive and UnitCanAssist("player", unit) then
-		spell = dispelType and self.defensive[dispelType]
+		spell = dispelType and self.defensive[lib.specialIDs[spellID] or dispelType]
 	end
 	return not not spell, spell or nil
 end
@@ -208,7 +213,8 @@ local function debuffIterator(unit, index)
 	repeat
 		index = index + 1
 		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff = UnitDebuff(unit, index)
-		local spell = name and dispelType and lib.defensive[dispelType]
+		local actualDispelType = lib.specialIDs[spellID] or dispelType
+		local spell = name and actualDispelType and lib.defensive[actualDispelType]
 		if spell then
 			return index, spell, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff
 		end
@@ -270,7 +276,7 @@ function lib:CanDispelWith(unit, spellID)
 			local name, _, _, _, dispelType = UnitDebuff(unit, index)
 			if not name then
 				return false
-			elseif self.defensive[dispelType] == spellID then
+			elseif self.defensive[lib.specialIDs[spellID] or dispelType] == spellID then
 				return true
 			end
 		end
