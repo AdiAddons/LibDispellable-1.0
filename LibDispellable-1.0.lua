@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 15
+local MAJOR, MINOR = "LibDispellable-1.0", 16
 --@debug@
 MINOR = 999999999
 --@end-debug@
@@ -169,6 +169,29 @@ end
 -- @return isEnrage (boolean) true if the passed spell ID
 function lib:IsEnrageEffect(spellID)
 	return spellID and lib.enrageEffectIDs[spellID]
+end
+
+-- ----------------------------------------------------------------------------
+-- Detect available dispel skills
+-- ----------------------------------------------------------------------------
+
+--- Get the actual dispell type of an aura, including tranquilize and special cases.
+-- @name LibDispellable:GetDispelType
+-- @param dispelType (string) The dispel type as returned by Blizzard API
+-- @param spellID (number) The spell ID
+-- @return dispelType (string) What can actually dispel the aura
+function lib:GetDispelType(dispelType, spellID)
+	if not spellID then
+		return nil
+	elseif lib.enrageEffectIDs[spellID] then
+		return "tranquilize"
+	elseif lib.specialIDs[spellID] then
+		return lib.specialIDs[spellID]
+	elseif dispelType == "none" then
+		return nil
+	else
+		return dispelType
+	end
 end
 
 -- ----------------------------------------------------------------------------
