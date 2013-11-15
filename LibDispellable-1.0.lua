@@ -307,6 +307,21 @@ function lib:CanDispelWith(unit, spellID)
 	return false
 end
 
+--- Test if player can dispel anything.
+-- @name LibDispellable:HasDispel
+-- @return boolean true if the player has any spell that can be used to dispel something.
+function lib:HasDispel()
+	return next(self.spells)
+end
+
+--- Get an iterator of the dispel spells.
+-- @name LibDispellable:IterateDispelSpells
+-- @return a (iterator, data, index) triplet usable in for .. in loops.
+--  Each iteration returns a spell id and the general dispel type: "offensive", "tranquilize" or "defensive"
+function lib:IterateDispelSpells()
+	return next, self.spells, nil
+end
+
 -- Initialization
 if IsLoggedIn() then
 	lib:UpdateSpells()
