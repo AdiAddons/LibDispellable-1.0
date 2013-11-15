@@ -194,11 +194,35 @@ function lib:GetDispelType(dispelType, spellID)
 	end
 end
 
--- ----------------------------------------------------------------------------
--- Simple query method
--- ----------------------------------------------------------------------------
+--- Check if an aura can be dispelled by anyone.
+-- @name LibDispellable:IsDispellable
+-- @param dispelType (string) The dispel mechanism as returned by UnitAura
+-- @param spellID (number) The spell ID
+-- @return boolean True if the aura can be dispelled in some way
+function lib:IsDispellable(dispelType, spellID)
+	return spellID and (lib.enrageEffectIDs[spellID] or lib.specialIDs[spellID])
+		or (dispelType and dispelType ~= "none" and dispelType ~= "")
+end
 
---- Test if the player can dispel the given (de)buff on the given unit.
+--- Check which player spell can be used to dispel an aura.
+-- @name LibDispellable:GetDispelSpell
+-- @param dispelType (string) The dispel mechanism as returned by UnitAura
+-- @param spellID (number) The spell ID
+-- @param isBuff (boolean) True if the spell is a buff, false if it is a debuff.
+-- @return number The spell ID of the dispel, or nil if the player cannot dispel it.
+function lib:GetDispelSpell(dispelType, spellID, isBuff)
+	local actualDispelType = self:GetDispelType(dispelType, spellID)
+	if isBuff then
+		if actualDispelType == "tranquilize" then
+			return self.tranquilize
+		elseif actualDispelType == "Magic" then
+			return self.offensive
+		end
+	elseif actualDispelType then
+		return self.defensive[actualDispelType]
+	end
+end
+
 -- @name LibDispellable:CanDispel
 -- @param unit (string) The unit id.
 -- @param offensive (boolean) True to test offensive dispel, i.e. enemy buffs.
