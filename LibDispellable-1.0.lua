@@ -31,10 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 17
---@debug@
-MINOR = 999999999
---@end-debug@
+local MAJOR, MINOR = "LibDispellable-1.0", 18
 assert(LibStub, MAJOR.." requires LibStub")
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -117,13 +114,14 @@ function lib:UpdateSpells()
 		self.defensive.Disease = self.defensive.Magic
 
 	elseif class == "DRUID" then
-		if IsSpellKnown(88423) then -- Nature's Cure
-			self.defensive.Curse = 88423
-			self.defensive.Magic = 88423
-		else
-			self.defensive.Curse = CheckSpell(2782) -- Remove Corruption
-		end
-		self.defensive.Poison = self.defensive.Curse
+		local cure = IsSpellKnown(88423) -- Nature's Cure
+		local rmCorruption = CheckSpell(2782) -- Remove Corruption
+		local symbCleanse = CheckSpell(122288) -- Symbiosis: Cleanse
+		self.defensive.Magic = cure
+		self.defensive.Curse = cure or rmCorruption
+		self.defensive.Poison = cure or rmCorruption or symbCleanse
+		self.defensive.Disease = symbCleanse
+		self.offensive = CheckSpell(110802) -- Symbiosis: Purge
 		self.tranquilize = CheckSpell(2908) -- Soothe
 
 	elseif class == "ROGUE" then
