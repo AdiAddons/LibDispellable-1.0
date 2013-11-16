@@ -231,6 +231,16 @@ local function buffIterator(unit, index)
 	until not name
 end
 
+local function allBuffIterator(unit, index)
+	repeat
+		index = index + 1
+		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura = UnitBuff(unit, index)
+		if lib:IsDispellable(dispelType, spellID) then
+			return index, lib:GetDispelSpell(dispelType, spellID, true), name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura
+		end
+	until not name
+end
+
 local function debuffIterator(unit, index)
 	repeat
 		index = index + 1
@@ -242,20 +252,31 @@ local function debuffIterator(unit, index)
 	until not name
 end
 
+local function allDebuffIterator(unit, index)
+	repeat
+		index = index + 1
+		local name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff = UnitDebuff(unit, index)
+		if lib:IsDispellable(dispelType, spellID) then
+			return index, lib:GetDispelSpell(dispelType, spellID, false), name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff
+		end
+	until not name
+end
+
 --- Iterate through unit (de)buffs that can be dispelled by the player.
 -- @name LibDispellable:IterateDispellableAuras
 -- @param unit (string) The unit to scan.
 -- @param buffs (boolean) true to test buffs instead of debuffs (offensive dispel).
+-- @param allDispellable (boolean) Include auras that can be dispelled even if the player cannot.
 -- @return A triplet usable in the "in" part of a for ... in ... do loop.
 -- @usage
 --   for index, spellID, name, rank, icon, count, dispelType, duration, expires, caster, isStealable, shouldConsolidate, spellID, canApplyAura, isBossDebuff in LibDispellable:IterateDispellableAuras("target", true) do
 --     print("Can dispel", name, "on target using", GetSpellInfo(spellID))
 --   end
-function lib:IterateDispellableAuras(unit, buffs)
-	if buffs and UnitCanAttack("player", unit) and (self.offensive or self.tranquilize) then
-		return buffIterator, unit, 0
-	elseif not buffs and UnitCanAssist("player", unit) and next(self.defensive) then
-		return debuffIterator, unit, 0
+function lib:IterateDispellableAuras(unit, buffs, allDispellable)
+	if buffs and UnitCanAttack("player", unit) and next(self.buff) then
+		return (allDispellable and allBuffIterator or buffIterator), unit, 0
+	elseif not buffs and UnitCanAssist("player", unit) and next(self.debuff) then
+		return (allDispellable and allDebuffIterator or debuffIterator), unit, 0
 	else
 		return noop
 	end
