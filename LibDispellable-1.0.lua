@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 21
+local MAJOR, MINOR = "LibDispellable-1.0", 22
 assert(LibStub, MAJOR.." requires LibStub")
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -114,7 +114,7 @@ function lib:UpdateSpells()
 		self.debuff.Disease = self.debuff.Magic
 
 	elseif class == "DRUID" then
-		local cure = IsSpellKnown(88423) -- Nature's Cure
+		local cure = CheckSpell(88423) -- Nature's Cure
 		local rmCorruption = CheckSpell(2782) -- Remove Corruption
 		local symbCleanse = CheckSpell(122288) -- Symbiosis: Cleanse
 		self.debuff.Magic = cure
