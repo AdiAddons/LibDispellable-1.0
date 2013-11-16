@@ -53,7 +53,7 @@ end
 lib.buff = lib.buff or {}
 lib.debuff = lib.debuff or {}
 lib.specialIDs = wipe(lib.specialIDs or {})
-lib.spells = {}
+lib.spells = lib.spells or {}
 
 for _, id in ipairs({
 	-- Datamined using fetchEnrageList.sh (see source)
