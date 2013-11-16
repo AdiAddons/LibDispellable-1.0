@@ -50,7 +50,8 @@ end
 -- Data
 -- ----------------------------------------------------------------------------
 
-lib.defensive = lib.defensive or {}
+lib.buff = lib.buff or {}
+lib.debuff = lib.debuff or {}
 lib.specialIDs = wipe(lib.specialIDs or {})
 lib.spells = {}
 
@@ -82,76 +83,76 @@ local function CheckSpell(spellID, pet)
 end
 
 function lib:UpdateSpells()
-	wipe(self.defensive)
-	self.offensive = nil
+	wipe(self.buff)
+	wipe(self.debuff)
 
 	local _, class = UnitClass("player")
 
 	if class == "HUNTER" then
-		self.offensive = CheckSpell(19801) -- Tranquilizing Shot
-		self.tranquilize = self.offensive
+		self.buff.Magic = CheckSpell(19801) -- Tranquilizing Shot
+		self.buff.tranquilize = self.offensive.Magic
 
 	elseif class == "SHAMAN" then
-		self.offensive = CheckSpell(370) -- Purge
+		self.buff.Magic = CheckSpell(370) -- Purge
 		if IsSpellKnown(77130) then -- Purify Spirit
-			self.defensive.Curse = 77130
-			self.defensive.Magic = 77130
+			self.debuff.Curse = 77130
+			self.debuff.Magic = 77130
 		else
-			self.defensive.Curse = CheckSpell(51886) -- Cleanse Spirit
+			self.debuff.Curse = CheckSpell(51886) -- Cleanse Spirit
 		end
 
 	elseif class == "WARLOCK" then
-		self.offensive = 19505 -- Devour Magic (Felhunter)
-		self.defensive.Magic = CheckSpell(132411) or CheckSpell(89808, true) -- Singe Magic (Imp)
+		self.buff.Magic = 19505 -- Devour Magic (Felhunter)
+		self.debuff.Magic = CheckSpell(132411) or CheckSpell(89808, true) -- Singe Magic (Imp)
 
 	elseif class == "MAGE" then
-		self.defensive.Curse = CheckSpell(475) -- Remove Curse
+		self.debuff.Curse = CheckSpell(475) -- Remove Curse
 
 	elseif class == "PRIEST" then
-		self.offensive = CheckSpell(528) -- Dispel Magic
-		self.defensive.Magic = CheckSpell(527) -- Purify
-		self.defensive.Disease = self.defensive.Magic
+		self.buff.Magic = CheckSpell(528) -- Dispel Magic
+		self.debuff.Magic = CheckSpell(527) -- Purify
+		self.debuff.Disease = self.debuff.Magic
 
 	elseif class == "DRUID" then
 		local cure = IsSpellKnown(88423) -- Nature's Cure
 		local rmCorruption = CheckSpell(2782) -- Remove Corruption
 		local symbCleanse = CheckSpell(122288) -- Symbiosis: Cleanse
-		self.defensive.Magic = cure
-		self.defensive.Curse = cure or rmCorruption
-		self.defensive.Poison = cure or rmCorruption or symbCleanse
-		self.defensive.Disease = symbCleanse
-		self.offensive = CheckSpell(110802) -- Symbiosis: Purge
-		self.tranquilize = CheckSpell(2908) -- Soothe
+		self.debuff.Magic = cure
+		self.debuff.Curse = cure or rmCorruption
+		self.debuff.Poison = cure or rmCorruption or symbCleanse
+		self.debuff.Disease = symbCleanse
+		self.buff.Magic = CheckSpell(110802) -- Symbiosis: Purge
+		self.buff.tranquilize = CheckSpell(2908) -- Soothe
 
 	elseif class == "ROGUE" then
-		self.tranquilize = CheckSpell(5938) -- Shiv
+		self.buff.tranquilize = CheckSpell(5938) -- Shiv
 
 	elseif class == "PALADIN" then
 		if IsSpellKnown(4987) then -- Cleanse
-			self.defensive.Poison = 4987
-			self.defensive.Disease = 4987
+			self.debuff.Poison = 4987
+			self.debuff.Disease = 4987
 			if IsSpellKnown(53551) then -- Sacred Cleansing
-				self.defensive.Magic = 4987
+				self.debuff.Magic = 4987
 			end
 		end
 
 	elseif class == "MONK" then
-		self.defensive.Disease = CheckSpell(115450) -- Detox
-		self.defensive.Poison = self.defensive.Disease
+		self.debuff.Disease = CheckSpell(115450) -- Detox
+		self.debuff.Poison = self.debuff.Disease
 		if IsSpellKnown(115451) then -- Internal Medicine
-			self.defensive.Magic = self.defensive.Disease
+			self.debuff.Magic = self.debuff.Disease
 		end
 	end
 
 	wipe(self.spells)
-	if self.offensive then
-		self.spells[self.offensive] = 'offensive'
+	if self.buff.Magic then
+		self.spells[self.buff.Magic] = 'offensive'
 	end
-	if self.tranquilize then
-		self.spells[self.tranquilize] = 'tranquilize'
+	if self.buff.tranquilize then
+		self.spells[self.buff.tranquilize] = 'tranquilize'
 	end
-	for dispelType, id in pairs(self.defensive) do
-		self.spells[id] = 'defensive'
+	for dispelType, id in pairs(self.debuff) do
+		self.spells[id] = 'debuff'
 	end
 
 end
@@ -194,15 +195,7 @@ end
 -- @return number The spell ID of the dispel, or nil if the player cannot dispel it.
 function lib:GetDispelSpell(dispelType, spellID, isBuff)
 	local actualDispelType = self:GetDispelType(dispelType, spellID)
-	if isBuff then
-		if actualDispelType == "tranquilize" then
-			return self.tranquilize
-		elseif actualDispelType == "Magic" then
-			return self.offensive
-		end
-	elseif actualDispelType then
-		return self.defensive[actualDispelType]
-	end
+	return actualDispelType and self[isBuff and "buff" or "debuff"][actualDispelType]
 end
 
 --- Test if the player can dispel the given aura on the given unit.
@@ -296,7 +289,7 @@ end
 --- Get an iterator of the dispel spells.
 -- @name LibDispellable:IterateDispelSpells
 -- @return a (iterator, data, index) triplet usable in for .. in loops.
---  Each iteration returns a spell id and the general dispel type: "offensive", "tranquilize" or "defensive"
+--  Each iteration returns a spell id and the general dispel type: "offensive", "tranquilize" or "debuff"
 function lib:IterateDispelSpells()
 	return next, self.spells, nil
 end
