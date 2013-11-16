@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 20
+local MAJOR, MINOR = "LibDispellable-1.0", 21
 assert(LibStub, MAJOR.." requires LibStub")
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -152,7 +152,7 @@ function lib:UpdateSpells()
 		self.spells[self.buff.tranquilize] = 'tranquilize'
 	end
 	for dispelType, id in pairs(self.debuff) do
-		self.spells[id] = 'debuff'
+		self.spells[id] = 'defensive'
 	end
 
 end
