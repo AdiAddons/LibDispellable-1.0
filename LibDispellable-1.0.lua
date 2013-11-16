@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 18
+local MAJOR, MINOR = "LibDispellable-1.0", 19
 assert(LibStub, MAJOR.." requires LibStub")
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -51,7 +51,7 @@ end
 -- ----------------------------------------------------------------------------
 
 lib.defensive = lib.defensive or {}
-lib.enrageEffectIDs = wipe(lib.enrageEffectIDs or {})
+lib.specialIDs = wipe(lib.specialIDs or {})
 lib.spells = {}
 
 for _, id in ipairs({
@@ -67,11 +67,10 @@ for _, id in ipairs({
 	117837, 119629, 123936, 124019, 124309, 124840, 126370, 127823, 127955,
 	128231, 129016, 129874, 130196, 130202, 131150, 135524, 135548, 142760,
 	145554, 145692, 145974,
-}) do lib.enrageEffectIDs[id] = true end
+}) do lib.specialIDs[id] = 'tranquilize' end
 
 -- Spells that do not have a dispel type according to Blizzard API
 -- but that can be dispelled anyway.
-lib.specialIDs = wipe(lib.specialIDs or {})
 lib.specialIDs[144351] = "Magic" -- Mark of Arrogance (Sha of Pride encounter)
 
 -- ----------------------------------------------------------------------------
@@ -162,7 +161,7 @@ end
 -- @param spellID (number) The spell ID.
 -- @return boolean true if the aura is an enrage.
 function lib:IsEnrageEffect(spellID)
-	return lib.enrageEffectIDs[spellID or false]
+	return lib.specialIDs[spellID or false] == "tranquilize"
 end
 
 --- Get the actual dispel mechanism of an aura, including tranquilize and special cases.
@@ -171,14 +170,9 @@ end
 -- @param spellID (number) The spell ID
 -- @return dispelType (string) The actual dispel mechanism
 function lib:GetDispelType(dispelType, spellID)
-	if spellID then
-		if lib.enrageEffectIDs[spellID] then
-			return "tranquilize"
-		elseif lib.specialIDs then
-			return lib.specialIDs[spellID]
-		end
-	end
-	if dispelType and dispelType ~= "none" and dispelType ~= "" then
+	if spellID and lib.specialIDs[spellID] then
+		return lib.specialIDs[spellID]
+	elseif dispelType and dispelType ~= "none" and dispelType ~= "" then
 		return dispelType
 	end
 end
@@ -189,8 +183,7 @@ end
 -- @param spellID (number) The spell ID
 -- @return boolean True if the aura can be dispelled in some way
 function lib:IsDispellable(dispelType, spellID)
-	return spellID and (lib.enrageEffectIDs[spellID] or lib.specialIDs[spellID])
-		or (dispelType and dispelType ~= "none" and dispelType ~= "")
+	return self:GetDispelType(dispelType, spellID) ~= nil
 end
 
 --- Check which player spell can be used to dispel an aura.
