@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 22
+local MAJOR, MINOR = "LibDispellable-1.0", 23
 assert(LibStub, MAJOR.." requires LibStub")
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -90,7 +90,7 @@ function lib:UpdateSpells()
 
 	if class == "HUNTER" then
 		self.buff.Magic = CheckSpell(19801) -- Tranquilizing Shot
-		self.buff.tranquilize = self.offensive.Magic
+		self.buff.tranquilize = self.buff.Magic
 
 	elseif class == "SHAMAN" then
 		self.buff.Magic = CheckSpell(370) -- Purge
