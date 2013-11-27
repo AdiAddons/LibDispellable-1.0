@@ -273,9 +273,9 @@ end
 --     print("Can dispel", name, "on target using", GetSpellInfo(spellID))
 --   end
 function lib:IterateDispellableAuras(unit, buffs, allDispellable)
-	if buffs and UnitCanAttack("player", unit) and next(self.buff) then
+	if buffs and UnitCanAttack("player", unit) and (allDispellable or next(self.buff)) then
 		return (allDispellable and allBuffIterator or buffIterator), unit, 0
-	elseif not buffs and UnitCanAssist("player", unit) and next(self.debuff) then
+	elseif not buffs and UnitCanAssist("player", unit) and (allDispellable or next(self.debuff)) then
 		return (allDispellable and allDebuffIterator or debuffIterator), unit, 0
 	else
 		return noop
