@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 23
+local MAJOR, MINOR = "LibDispellable-1.0", 24
 assert(LibStub, MAJOR.." requires LibStub")
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -141,6 +141,11 @@ function lib:UpdateSpells()
 		self.debuff.Poison = self.debuff.Disease
 		if IsSpellKnown(115451) then -- Internal Medicine
 			self.debuff.Magic = self.debuff.Disease
+		end
+
+	elseif class == "DEATHKNIGHT" then
+		if IsPlayerSpell(58631) then -- Glyph of Icy Touch
+			self.buff.Magic = 45477 -- Icy Touch
 		end
 	end
 
