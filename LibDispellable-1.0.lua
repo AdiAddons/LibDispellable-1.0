@@ -128,12 +128,9 @@ function lib:UpdateSpells()
 	elseif class == "DRUID" then
 		local cure = CheckSpell(88423) -- Nature's Cure
 		local rmCorruption = CheckSpell(2782) -- Remove Corruption
-		local symbCleanse = CheckSpell(122288) -- Symbiosis: Cleanse
 		self.debuff.Magic = cure
 		self.debuff.Curse = cure or rmCorruption
-		self.debuff.Poison = cure or rmCorruption or symbCleanse
-		self.debuff.Disease = symbCleanse
-		self.buff.Magic = CheckSpell(110802) -- Symbiosis: Purge
+		self.debuff.Poison = cure or rmCorruption
 		self.buff.tranquilize = CheckSpell(2908) -- Soothe
 
 	elseif class == "ROGUE" then
