@@ -106,7 +106,7 @@ function lib:UpdateSpells()
 
 	elseif class == "SHAMAN" then
 		self.buff.Magic = CheckSpell(370) -- Purge
-		if IsSpellKnown(77130) then -- Purify Spirit
+		if IsPlayerSpell(77130) then -- Purify Spirit
 			self.debuff.Curse = 77130
 			self.debuff.Magic = 77130
 		else
