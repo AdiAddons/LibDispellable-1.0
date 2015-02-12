@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 26
+local MAJOR, MINOR = "LibDispellable-1.0", 27
 assert(LibStub, MAJOR.." requires LibStub")
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -100,44 +100,33 @@ function lib:UpdateSpells()
 
 	local _, class = UnitClass("player")
 
-	if class == "HUNTER" then
-		self.buff.Magic = CheckSpell(19801) -- Tranquilizing Shot
-		self.buff.tranquilize = self.buff.Magic
-
-	elseif class == "SHAMAN" then
-		self.buff.Magic = CheckSpell(370) -- Purge
-		if IsSpellKnown(77130) then -- Purify Spirit
-			self.debuff.Curse = 77130
-			self.debuff.Magic = 77130
-		else
-			self.debuff.Curse = CheckSpell(51886) -- Cleanse Spirit
+	if class == "DEATHKNIGHT" then
+		if IsPlayerSpell(58631) then -- Glyph of Icy Touch
+			self.buff.Magic = 45477 -- Icy Touch
 		end
-
-	elseif class == "WARLOCK" then
-		self.buff.Magic = 19505 -- Devour Magic (Felhunter)
-		self.debuff.Magic = CheckSpell(132411) or CheckSpell(89808, true) -- Singe Magic (Imp)
-
-	elseif class == "MAGE" then
-		self.debuff.Curse = CheckSpell(475) -- Remove Curse
-
-	elseif class == "PRIEST" then
-		self.buff.Magic = CheckSpell(528) -- Dispel Magic
-		self.debuff.Magic = CheckSpell(527) -- Purify
-		self.debuff.Disease = self.debuff.Magic
 
 	elseif class == "DRUID" then
 		local cure = CheckSpell(88423) -- Nature's Cure
 		local rmCorruption = CheckSpell(2782) -- Remove Corruption
-		local symbCleanse = CheckSpell(122288) -- Symbiosis: Cleanse
 		self.debuff.Magic = cure
 		self.debuff.Curse = cure or rmCorruption
-		self.debuff.Poison = cure or rmCorruption or symbCleanse
-		self.debuff.Disease = symbCleanse
-		self.buff.Magic = CheckSpell(110802) -- Symbiosis: Purge
+		self.debuff.Poison = cure or rmCorruption
 		self.buff.tranquilize = CheckSpell(2908) -- Soothe
 
-	elseif class == "ROGUE" then
-		self.buff.tranquilize = CheckSpell(5938) -- Shiv
+	elseif class == "HUNTER" then
+		self.buff.Magic = CheckSpell(19801) -- Tranquilizing Shot
+		self.buff.tranquilize = self.buff.Magic
+
+	elseif class == "MAGE" then
+		self.debuff.Curse = CheckSpell(475) -- Remove Curse
+		self.buff.Magic = CheckSpell(30449) -- Spellsteal
+
+	elseif class == "MONK" then
+		self.debuff.Disease = CheckSpell(115450) -- Detox
+		self.debuff.Poison = self.debuff.Disease
+		if IsSpellKnown(115451) then -- Internal Medicine
+			self.debuff.Magic = self.debuff.Disease
+		end
 
 	elseif class == "PALADIN" then
 		if IsSpellKnown(4987) then -- Cleanse
@@ -148,16 +137,31 @@ function lib:UpdateSpells()
 			end
 		end
 
-	elseif class == "MONK" then
-		self.debuff.Disease = CheckSpell(115450) -- Detox
-		self.debuff.Poison = self.debuff.Disease
-		if IsSpellKnown(115451) then -- Internal Medicine
-			self.debuff.Magic = self.debuff.Disease
+	elseif class == "PRIEST" then
+		self.buff.Magic = CheckSpell(528) -- Dispel Magic
+		self.debuff.Magic = CheckSpell(527) -- Purify
+		self.debuff.Disease = self.debuff.Magic
+
+	elseif class == "ROGUE" then
+		self.buff.tranquilize = CheckSpell(5938) -- Shiv
+
+	elseif class == "SHAMAN" then
+		self.buff.Magic = CheckSpell(370) -- Purge
+		if IsPlayerSpell(77130) then -- Purify Spirit
+			self.debuff.Curse = 77130
+			self.debuff.Magic = 77130
+		else
+			self.debuff.Curse = CheckSpell(51886) -- Cleanse Spirit
 		end
 
-	elseif class == "DEATHKNIGHT" then
-		if IsPlayerSpell(58631) then -- Glyph of Icy Touch
-			self.buff.Magic = 45477 -- Icy Touch
+	elseif class == "WARLOCK" then
+		self.buff.Magic = CheckSpell(19505, true) or CheckSpell(115284, true) -- Devour Magic (Felhunter) or Clone Magic (Observer)
+		-- IsSpellKnown(132411)/IsPlayerSpell(132411) always return false, so we check the texture of Command Demon instead
+		local _, _, texture = GetSpellInfo(119898) -- Command Demon
+		if string.find(texture, "spell_fel_elementaldevastation") then
+			self.debuff.Magic = 132411 -- Single Magic (sacrificed imp with Grimoire of Sacrifice talent)
+		else
+			self.debuff.Magic = CheckSpell(89808, true) or CheckSpell(115276, true) -- Singe Magic (Imp) or Sear Magic (Fel Imp)
 		end
 	end
 
