@@ -1,4 +1,4 @@
-## Interface: 60000
+## Interface: 60100
 ## LoadOnDemand: 1
 ## Title: Lib: Dispellable-1.0
 ## Version: @project-version@
@@ -8,4 +8,3 @@
 
 LibStub.lua
 LibDispellable-1.0.lua
-
