@@ -1,10 +1,9 @@
 -
-  type: textile
-  input-file: README.textile
+  type: markdown
+  input-file: README.md
   output-page: Main
 
 -
   type: luadoc
   input-file: LibDispellable-1.0.lua
   output-page: "API"
-
