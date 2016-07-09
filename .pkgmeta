@@ -1,4 +1,1 @@
 package-as: LibDispellable-1.0
-
-ignore:
-- fetchEnrageList.sh

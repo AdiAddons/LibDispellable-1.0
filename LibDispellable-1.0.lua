@@ -55,32 +55,6 @@ lib.debuff = lib.debuff or {}
 lib.specialIDs = wipe(lib.specialIDs or {})
 lib.spells = lib.spells or {}
 
-for _, id in ipairs({
-	-- Datamined using fetchEnrageList.sh (see source)
-	  4146,   8599,  12880,  15061,  15716,  16791,  18499,  18501,  19451,  19812,
-	 22428,  23128,  23257,  23342,  24689,  26041,  26051,  28371,  29340,  30485,
-	 31540,  31915,  32714,  33958,  34392,  34670,  37605,  37648,  37975,  38046,
-	 38166,  38664,  39031,  39575,  40076,  40601,  41254,  41364,  41447,  42705,
-	 42745,  43139,  43292,  43664,  47399,  48138,  48142,  48193,  48702,  49029,
-	 50420,  50636,  51170,  51513,  52071,  52262,  52309,  52461,  52470,  52537,
-	 53361,  54356,  54427,  54475,  54781,  55285,  55462,  56646,  56729,  56769,
-	 57733,  58942,  59465,  59694,  59697,  59707,  59828,  60075,  60177,  60430,
-	 61369,  63147,  63227,  66092,  66759,  67233,  68541,  69052,  70371,  72143,
-	 72203,  75998,  76100,  76487,  76816,  76862,  77238,  78722,  78943,  79420,
-	 80084,  80158,  80467,  81173,  81706,  81772,  82033,  82759,  86736,  90045,
-	 91668, 101109, 101110, 102134, 102989, 106925, 108169, 109889, 111220, 111418,
-	115006, 115430, 115639, 116863, 116958, 117837, 118139, 118507, 119629, 120093,
-	123914, 123936, 124019, 124172, 124309, 124840, 124976, 125738, 125864, 126075,
-	126254, 126370, 126410, 127823, 127955, 128006, 128231, 128248, 128809, 129016,
-	129874, 130196, 130202, 131150, 132710, 134983, 135524, 135548, 135569, 135698,
-	137334, 140108, 141663, 142760, 145554, 145692, 145974, 148295, 148852, 150759,
-	151553, 151965, 153909, 154017, 154543, 154982, 155198, 155208, 155620, 156314,
-	157346, 158304, 158337, 158456, 159479, 159748, 161601, 163121, 163483, 164257,
-	164324, 164811, 164835, 165512, 168620, 172360, 172781, 173238, 173950, 174427,
-	175192, 175337, 175463, 175586, 175743, 176023, 176048, 176214, 176396, 177152,
-	178658, 180643, 182367, 183883, 184039, 184359, 185997, 188504, 189061,
-}) do lib.specialIDs[id] = 'tranquilize' end
-
 -- Spells that do not have a dispel type according to Blizzard API
 -- but that can be dispelled anyway.
 lib.specialIDs[144351] = "Magic" -- Mark of Arrogance (Sha of Pride encounter)
@@ -110,11 +84,6 @@ function lib:UpdateSpells()
 		self.debuff.Magic = cure
 		self.debuff.Curse = cure or rmCorruption
 		self.debuff.Poison = cure or rmCorruption
-		self.buff.tranquilize = CheckSpell(2908) -- Soothe
-
-	elseif class == "HUNTER" then
-		self.buff.Magic = CheckSpell(19801) -- Tranquilizing Shot
-		self.buff.tranquilize = self.buff.Magic
 
 	elseif class == "MAGE" then
 		self.debuff.Curse = CheckSpell(475) -- Remove Curse
@@ -141,9 +110,6 @@ function lib:UpdateSpells()
 		self.debuff.Magic = CheckSpell(527) -- Purify
 		self.debuff.Disease = self.debuff.Magic
 
-	elseif class == "ROGUE" then
-		self.buff.tranquilize = CheckSpell(5938) -- Shiv
-
 	elseif class == "SHAMAN" then
 		self.buff.Magic = CheckSpell(370) -- Purge
 		if IsPlayerSpell(77130) then -- Purify Spirit
@@ -168,24 +134,13 @@ function lib:UpdateSpells()
 	if self.buff.Magic then
 		self.spells[self.buff.Magic] = 'offensive'
 	end
-	if self.buff.tranquilize then
-		self.spells[self.buff.tranquilize] = 'tranquilize'
-	end
 	for dispelType, id in pairs(self.debuff) do
 		self.spells[id] = 'defensive'
 	end
 
 end
 
---- Test if the specified aura is an enrage effect.
--- @name LibDispellable:IsEnrageEffect.
--- @param spellID (number) The spell ID.
--- @return boolean true if the aura is an enrage.
-function lib:IsEnrageEffect(spellID)
-	return lib.specialIDs[spellID or false] == "tranquilize"
-end
-
---- Get the actual dispel mechanism of an aura, including tranquilize and special cases.
+--- Get the actual dispel mechanism of an aura, including special cases.
 -- @name LibDispellable:GetDispelType
 -- @param dispelType (string) The dispel mechanism as returned by UnitAura
 -- @param spellID (number) The spell ID
@@ -330,7 +285,7 @@ end
 --- Get an iterator of the dispel spells.
 -- @name LibDispellable:IterateDispelSpells
 -- @return a (iterator, data, index) triplet usable in for .. in loops.
---  Each iteration returns a spell id and the general dispel type: "offensive", "tranquilize" or "debuff"
+--  Each iteration returns a spell id and the general dispel type: "offensive" or "debuff"
 function lib:IterateDispelSpells()
 	return next, self.spells, nil
 end
