@@ -106,13 +106,11 @@ function lib:UpdateSpells()
 		self.buff.Magic = CheckSpell(528) -- Dispel Magic
 
 	elseif class == "SHAMAN" then
+		local purify = CheckSpell(77130) -- Purify Spirit
+		local cleanse = CheckSpell(51886) -- Cleanse Spirit
+		self.debuff.Curse = purify or cleanse
+		self.debuff.Magic = purify
 		self.buff.Magic = CheckSpell(370) -- Purge
-		if IsPlayerSpell(77130) then -- Purify Spirit
-			self.debuff.Curse = 77130
-			self.debuff.Magic = 77130
-		else
-			self.debuff.Curse = CheckSpell(51886) -- Cleanse Spirit
-		end
 
 	elseif class == "WARLOCK" then
 		self.buff.Magic = CheckSpell(19505, true) or CheckSpell(115284, true) -- Devour Magic (Felhunter) or Clone Magic (Observer)
