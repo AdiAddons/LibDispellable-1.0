@@ -113,14 +113,8 @@ function lib:UpdateSpells()
 		self.buff.Magic = CheckSpell(370) -- Purge
 
 	elseif class == "WARLOCK" then
-		self.buff.Magic = CheckSpell(19505, true) or CheckSpell(115284, true) -- Devour Magic (Felhunter) or Clone Magic (Observer)
-		-- IsSpellKnown(132411)/IsPlayerSpell(132411) always return false, so we check the texture of Command Demon instead
-		local _, _, texture = GetSpellInfo(119898) -- Command Demon
-		if string.find(texture, "spell_fel_elementaldevastation") then
-			self.debuff.Magic = 132411 -- Single Magic (sacrificed imp with Grimoire of Sacrifice talent)
-		else
-			self.debuff.Magic = CheckSpell(89808, true) or CheckSpell(115276, true) -- Singe Magic (Imp) or Sear Magic (Fel Imp)
-		end
+		self.buff.Magic = CheckSpell(171021, true) -- Torch Magic (Infernal)
+		self.debuff.Magic = CheckSpell(89808, true) -- Singe Magic (Imp)
 	end
 
 	wipe(self.spells)
