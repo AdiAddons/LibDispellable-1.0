@@ -99,9 +99,11 @@ function lib:UpdateSpells()
 		self.debuff.Magic = cleanse
 
 	elseif class == "PRIEST" then
+		local purify = CheckSpell(527) -- Purify
+		local disease = CheckSpell(213634) -- Purify Disease
+		self.debuff.Magic = purify
+		self.debuff.Disease = purify or disease
 		self.buff.Magic = CheckSpell(528) -- Dispel Magic
-		self.debuff.Magic = CheckSpell(527) -- Purify
-		self.debuff.Disease = self.debuff.Magic
 
 	elseif class == "SHAMAN" then
 		self.buff.Magic = CheckSpell(370) -- Purge
