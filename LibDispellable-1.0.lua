@@ -81,7 +81,6 @@ function lib:UpdateSpells()
 		self.debuff.Poison = cure or rmCorruption
 
 	elseif class == "MAGE" then
-		self.debuff.Curse = CheckSpell(475) -- Remove Curse
 		self.buff.Magic = CheckSpell(30449) -- Spellsteal
 
 	elseif class == "MONK" then
