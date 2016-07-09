@@ -91,13 +91,12 @@ function lib:UpdateSpells()
 		self.debuff.Magic = mwDetox
 
 	elseif class == "PALADIN" then
-		if IsSpellKnown(4987) then -- Cleanse
-			self.debuff.Poison = 4987
-			self.debuff.Disease = 4987
-			if IsSpellKnown(53551) then -- Sacred Cleansing
-				self.debuff.Magic = 4987
-			end
-		end
+		local cleanse = CheckSpell(4987) -- Cleanse
+		local toxins = CheckSpell(213644) -- Cleanse Toxins
+
+		self.debuff.Poison = cleanse or toxins
+		self.debuff.Disease = cleanse or toxins
+		self.debuff.Magic = cleanse
 
 	elseif class == "PRIEST" then
 		self.buff.Magic = CheckSpell(528) -- Dispel Magic
