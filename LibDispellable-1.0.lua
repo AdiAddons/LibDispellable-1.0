@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 28
+local MAJOR, MINOR = "LibDispellable-1.0", 29
 assert(LibStub, MAJOR.." requires LibStub")
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -75,41 +75,40 @@ function lib:UpdateSpells()
 
 	if class == "DRUID" then
 		local cure = CheckSpell(88423) -- Nature's Cure
-		local rmCorruption = CheckSpell(2782) -- Remove Corruption
+		local corruption = cure or CheckSpell(2782) -- Remove Corruption
 		self.debuff.Magic = cure
-		self.debuff.Curse = cure or rmCorruption
-		self.debuff.Poison = cure or rmCorruption
+		self.debuff.Curse = cure or corruption
+		self.debuff.Poison = cure or corruption
 
 	elseif class == "MAGE" then
 		self.buff.Magic = CheckSpell(30449) -- Spellsteal
 
 	elseif class == "MONK" then
-		local detox = CheckSpell(218164) -- Detox (Brewmaster or Windwalker)
 		local mwDetox = CheckSpell(115450) -- Detox (Mistweaver)
+		local detox = mwDetox or CheckSpell(218164) -- Detox (Brewmaster or Windwalker)
+		self.debuff.Magic = mwDetox
 		self.debuff.Disease = mwDetox or detox
 		self.debuff.Poison = mwDetox or detox
-		self.debuff.Magic = mwDetox
 
 	elseif class == "PALADIN" then
 		local cleanse = CheckSpell(4987) -- Cleanse
-		local toxins = CheckSpell(213644) -- Cleanse Toxins
-
+		local toxins = cleanse or CheckSpell(213644) -- Cleanse Toxins
+		self.debuff.Magic = cleanse
 		self.debuff.Poison = cleanse or toxins
 		self.debuff.Disease = cleanse or toxins
-		self.debuff.Magic = cleanse
 
 	elseif class == "PRIEST" then
 		local purify = CheckSpell(527) -- Purify
-		local disease = CheckSpell(213634) -- Purify Disease
+		local disease = purify or CheckSpell(213634) -- Purify Disease
 		self.debuff.Magic = purify
 		self.debuff.Disease = purify or disease
 		self.buff.Magic = CheckSpell(528) -- Dispel Magic
 
 	elseif class == "SHAMAN" then
 		local purify = CheckSpell(77130) -- Purify Spirit
-		local cleanse = CheckSpell(51886) -- Cleanse Spirit
-		self.debuff.Curse = purify or cleanse
+		local cleanse = purify or CheckSpell(51886) -- Cleanse Spirit
 		self.debuff.Magic = purify
+		self.debuff.Curse = purify or cleanse
 		self.buff.Magic = CheckSpell(370) -- Purge
 
 	elseif class == "WARLOCK" then
