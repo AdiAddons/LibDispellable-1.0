@@ -73,12 +73,7 @@ function lib:UpdateSpells()
 
 	local _, class = UnitClass("player")
 
-	if class == "DEATHKNIGHT" then
-		if IsPlayerSpell(58631) then -- Glyph of Icy Touch
-			self.buff.Magic = 45477 -- Icy Touch
-		end
-
-	elseif class == "DRUID" then
+	if class == "DRUID" then
 		local cure = CheckSpell(88423) -- Nature's Cure
 		local rmCorruption = CheckSpell(2782) -- Remove Corruption
 		self.debuff.Magic = cure
