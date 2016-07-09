@@ -90,11 +90,11 @@ function lib:UpdateSpells()
 		self.buff.Magic = CheckSpell(30449) -- Spellsteal
 
 	elseif class == "MONK" then
-		self.debuff.Disease = CheckSpell(115450) -- Detox
-		self.debuff.Poison = self.debuff.Disease
-		if IsSpellKnown(115451) then -- Internal Medicine
-			self.debuff.Magic = self.debuff.Disease
-		end
+		local detox = CheckSpell(218164) -- Detox (Brewmaster or Windwalker)
+		local mwDetox = CheckSpell(115450) -- Detox (Mistweaver)
+		self.debuff.Disease = mwDetox or detox
+		self.debuff.Poison = mwDetox or detox
+		self.debuff.Magic = mwDetox
 
 	elseif class == "PALADIN" then
 		if IsSpellKnown(4987) then -- Cleanse
