@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 29
+local MAJOR, MINOR = "LibDispellable-1.0", 30
 assert(LibStub, MAJOR.." requires LibStub")
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -73,12 +73,20 @@ function lib:UpdateSpells()
 
 	local _, class = UnitClass("player")
 
-	if class == "DRUID" then
+	if class == "DEMONHUNTER" then
+		self.debuff.Magic = CheckSpell(205604) -- Reverse Magic (PvP)
+
+	elseif class == "DRUID" then
 		local cure = CheckSpell(88423) -- Nature's Cure
 		local corruption = cure or CheckSpell(2782) -- Remove Corruption
 		self.debuff.Magic = cure
-		self.debuff.Curse = cure or corruption
-		self.debuff.Poison = cure or corruption
+		self.debuff.Curse = corruption
+		self.debuff.Poison = corruption
+
+	elseif class == "HUNTER" then
+		local mendingBandage = CheckSpell(212640) -- Mending Bandage (PvP)
+		self.debuff.Disease = mendingBandage
+		self.debuff.Poison = mendingBandage
 
 	elseif class == "MAGE" then
 		self.buff.Magic = CheckSpell(30449) -- Spellsteal
@@ -87,33 +95,33 @@ function lib:UpdateSpells()
 		local mwDetox = CheckSpell(115450) -- Detox (Mistweaver)
 		local detox = mwDetox or CheckSpell(218164) -- Detox (Brewmaster or Windwalker)
 		self.debuff.Magic = mwDetox
-		self.debuff.Disease = mwDetox or detox
-		self.debuff.Poison = mwDetox or detox
+		self.debuff.Disease = detox
+		self.debuff.Poison = detox
 
 	elseif class == "PALADIN" then
 		local cleanse = CheckSpell(4987) -- Cleanse
 		local toxins = cleanse or CheckSpell(213644) -- Cleanse Toxins
 		self.debuff.Magic = cleanse
-		self.debuff.Poison = cleanse or toxins
-		self.debuff.Disease = cleanse or toxins
+		self.debuff.Poison = toxins
+		self.debuff.Disease = toxins
 
 	elseif class == "PRIEST" then
 		local purify = CheckSpell(527) -- Purify
 		local disease = purify or CheckSpell(213634) -- Purify Disease
 		self.debuff.Magic = purify
-		self.debuff.Disease = purify or disease
+		self.debuff.Disease = disease
 		self.buff.Magic = CheckSpell(528) -- Dispel Magic
 
 	elseif class == "SHAMAN" then
 		local purify = CheckSpell(77130) -- Purify Spirit
 		local cleanse = purify or CheckSpell(51886) -- Cleanse Spirit
 		self.debuff.Magic = purify
-		self.debuff.Curse = purify or cleanse
+		self.debuff.Curse = cleanse
 		self.buff.Magic = CheckSpell(370) -- Purge
 
 	elseif class == "WARLOCK" then
 		self.buff.Magic = CheckSpell(171021, true) -- Torch Magic (Infernal)
-		self.debuff.Magic = CheckSpell(89808, true) -- Singe Magic (Imp)
+		self.debuff.Magic = CheckSpell(89808, true) or CheckSpell(212623) -- Singe Magic (Imp) / (PvP)
 	end
 
 	wipe(self.spells)
