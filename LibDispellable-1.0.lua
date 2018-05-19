@@ -36,6 +36,15 @@ assert(LibStub, MAJOR.." requires LibStub")
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
 
+local wipe = _G.wipe
+
+local IsSpellKnown = _G.IsSpellKnown
+local UnitBuff = _G.UnitBuff
+local UnitCanAssist = _G.UnitCanAssist
+local UnitCanAttack = _G.UnitCanAttack
+local UnitClass = _G.UnitClass
+local UnitDebuff = _G.UnitDebuff
+
 -- ----------------------------------------------------------------------------
 -- Event dispatcher
 -- ----------------------------------------------------------------------------
@@ -132,10 +141,11 @@ function lib:UpdateSpells()
 	end
 
 	wipe(self.spells)
-	if self.buff.Magic then
-		self.spells[self.buff.Magic] = 'offensive'
+	local spellID = self.buff.Magic
+	if spellID then
+		self.spells[spellID] = 'offensive'
 	end
-	for dispelType, id in pairs(self.debuff) do
+	for _, id in pairs(self.debuff) do
 		self.spells[id] = 'defensive'
 	end
 
