@@ -31,7 +31,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --]]
 
-local MAJOR, MINOR = "LibDispellable-1.0", 31
+local MAJOR, MINOR = "LibDispellable-1.0", 32
 assert(LibStub, MAJOR.." requires LibStub")
 local lib = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end
@@ -87,6 +87,14 @@ function lib:UpdateSpells()
 		local mendingBandage = CheckSpell(212640) -- Mending Bandage (PvP)
 		self.debuff.Disease = mendingBandage
 		self.debuff.Poison = mendingBandage
+		self.buff.Magic = CheckSpell(264028, true) -- Chi-Ji's Tranquility (crane)
+			or CheckSpell(264055, true) -- Serenity Dust (moth)
+			or CheckSpell(264056, true) -- Spore Cloud (sporebat)
+			or CheckSpell(264262, true) -- Soothing Water (water strider)
+			or CheckSpell(264263, true) -- Sonic Blast (bat)
+			or CheckSpell(264264, true) -- Nether Shock (nether ray)
+			or CheckSpell(264265, true) -- Spirit Shock (spirit beast)
+			or CheckSpell(264266, true) -- Nature's Grace (stag)
 
 	elseif class == "MAGE" then
 		self.buff.Magic = CheckSpell(30449) -- Spellsteal
